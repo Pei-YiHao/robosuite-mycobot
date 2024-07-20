@@ -20,7 +20,6 @@ setup(
         "scipy>=1.2.3",
         "mujoco>=2.3.0",
         "Pillow",
-        "opencv-python",
         "pynput",
         "termcolor",
     ],
