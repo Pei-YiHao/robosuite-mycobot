@@ -4,7 +4,7 @@ import robosuite.utils.transform_utils as trans
 from robosuite.utils.numba import jit_decorator
 
 
-@jit_decorator
+#@jit_decorator
 def nullspace_torques(mass_matrix, nullspace_matrix, initial_joint, joint_pos, joint_vel, joint_kp=10):
     """
     For a robot with redundant DOF(s), a nullspace exists which is orthogonal to the remainder of the controllable
@@ -40,7 +40,7 @@ def nullspace_torques(mass_matrix, nullspace_matrix, initial_joint, joint_pos, j
     return nullspace_torques
 
 
-@jit_decorator
+#@jit_decorator
 def opspace_matrices(mass_matrix, J_full, J_pos, J_ori):
     """
     Calculates the relevant matrices used in the operational space control algorithm
@@ -82,7 +82,7 @@ def opspace_matrices(mass_matrix, J_full, J_pos, J_ori):
     return lambda_full, lambda_pos, lambda_ori, nullspace_matrix
 
 
-@jit_decorator
+#@jit_decorator
 def orientation_error(desired, current):
     """
     This function calculates a 3-dimensional orientation error vector for use in the
