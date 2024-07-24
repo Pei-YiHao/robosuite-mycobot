@@ -16,20 +16,27 @@ For Linux support, you can find open-source Linux drivers and SDKs online.
 
 """
 
+import logging
 import threading
 import time
+
 from collections import namedtuple
 
 import numpy as np
 
+USE_PYSPACEMOUSE=False
+
 try:
-    import hid
+    import pyspacemouse
+    USE_PYSPACEMOUSE=True
 except ModuleNotFoundError as exc:
-    raise ImportError(
-        "Unable to load module hid, required to interface with SpaceMouse. "
-        "Only macOS is officially supported. Install the additional "
-        "requirements with `pip install -r requirements-extra.txt`"
-    ) from exc
+    try:
+        import hid
+    except ModuleNotFoundError as exc:
+        raise ImportError(
+            "Unable to import module pyspacemouse or hid, required to interface with SpaceMouse. "
+            "Install the additional requirements with `pip install -r requirements-extra.txt`"
+        ) from exc
 
 import robosuite.macros as macros
 from robosuite.devices import Device
@@ -118,18 +125,26 @@ class SpaceMouse(Device):
         pos_sensitivity=1.0,
         rot_sensitivity=1.0,
     ):
+        logging.debug("attempting to open SpaceNavigator device  (vendor_id={vendor_id}, product_id={product_id}")
 
-        print("Opening SpaceMouse device")
-        self.vendor_id = vendor_id
-        self.product_id = product_id
-        self.device = hid.device()
-        self.device.open(self.vendor_id, self.product_id)  # SpaceMouse
+        if USE_PYSPACEMOUSE:
+            self.device = pyspacemouse.open(set_nonblocking_loop=False)
 
+            if self.device is None:
+                hid_devices = '\n  * '.join([str(x) for x in pyspacemouse.list_all_hid_devices()])
+                raise IOError(f"failed to open SpaceNavigator with pyspacemouse - these HID devices are available:\n{hid_devices}")
+             
+            self.vendor_id, self.product_id = self.device.hid_id
+        else:   
+            self.vendor_id = vendor_id
+            self.product_id = product_id
+            self.device = hid.device()
+            self.device.open(self.vendor_id, self.product_id)  # SpaceMouse
+ 
+        logging.info(f"opened SpaceNavigator device with {'pyspacemouse' if USE_PYSPACEMOUSE else 'HIDAPI'} (vendor_id={self.vendor_id}, product_id={self.product_id})")
+        
         self.pos_sensitivity = pos_sensitivity
         self.rot_sensitivity = rot_sensitivity
-
-        print("Manufacturer: %s" % self.device.get_manufacturer_string())
-        print("Product: %s" % self.device.get_product_string())
 
         # 6-DOF variables
         self.x, self.y, self.z = 0, 0, 0
@@ -154,7 +169,6 @@ class SpaceMouse(Device):
         """
         Method to pretty print controls.
         """
-
         def print_command(char, info):
             char += " " * (30 - len(char))
             print("{}\t{}".format(char, info))
@@ -217,13 +231,43 @@ class SpaceMouse(Device):
 
     def run(self):
         """Listener method that keeps pulling new messages."""
+        if not USE_PYSPACEMOUSE:
+            return self.run_hid()
+            
+        while True:
+            state = self.device.read()
 
+            self.x = state.y * -1.0
+            self.y = state.x
+            self.z = state.z
+            
+            self.roll = state.pitch * -1.0
+            self.pitch = state.roll * -1.0
+            self.yaw = state.yaw
+            
+            self._control = [
+                self.x,
+                self.y,
+                self.z,
+                self.roll,
+                self.pitch,
+                self.yaw,
+            ]
+            
+            self.single_click_and_hold = bool(state.buttons[0])
+            
+            if state.buttons[1]:
+                self._reset_state = 1
+                self._enabled = False
+                self._reset_internal_state()
+
+    def run_hid(self):
+        """Listener method that keeps pulling new messages."""
         t_last_click = -1
 
         while True:
             d = self.device.read(13)
             if d is not None and self._enabled:
-
                 if self.product_id == 50741:
                     ## logic for older spacemouse model
 
