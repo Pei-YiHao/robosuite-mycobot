@@ -1,12 +1,21 @@
 """
 opencv renderer class.
 """
-import cv2
+try:
+    import cv2
+    USE_OPENCV=True
+except Exception as error:
+    print(f"warning:  robosuite - failed to import cv2 ({error})")
+    USE_OPENCV=False
+    
 import numpy as np
 
 
 class OpenCVRenderer:
     def __init__(self, sim):
+        if not USE_OPENCV:
+            raise RuntimeError(f"could not import OpenCV (cv2)")
+            
         # TODO: update this appropriately - need to get screen dimensions
         self.width = 1280
         self.height = 800
