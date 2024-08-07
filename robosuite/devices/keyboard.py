@@ -2,9 +2,16 @@
 Driver class for Keyboard controller.
 """
 
+import logging
 import numpy as np
-from pynput.keyboard import Controller, Key, Listener
 
+try:
+    from pynput.keyboard import Controller, Key, Listener
+    USE_KEYBOARD=True
+except Exception as error:
+    logging.warning(f"robosuite | failed to import pynput.keyboard ({error})")
+    USE_KEYBOARD=False
+    
 from robosuite.devices import Device
 from robosuite.utils.transform_utils import rotation_matrix
 
@@ -19,6 +26,9 @@ class Keyboard(Device):
 
     def __init__(self, pos_sensitivity=1.0, rot_sensitivity=1.0):
 
+        if not USE_KEYBOARD:
+            raise RuntimeError(f"could not import pynput.keyboard (requires X11 server to be running)")
+            
         self._display_controls()
         self._reset_internal_state()
 

@@ -1,11 +1,13 @@
 """
 opencv renderer class.
 """
+import logging
+
 try:
     import cv2
     USE_OPENCV=True
 except Exception as error:
-    print(f"warning:  robosuite - failed to import cv2 ({error})")
+    logging.warning(f"robosuite | failed to import cv2 ({error})")
     USE_OPENCV=False
     
 import numpy as np
