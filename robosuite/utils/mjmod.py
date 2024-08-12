@@ -886,7 +886,8 @@ class TextureModder(BaseModder):
             else:
                 # store geom color
                 self._defaults[name]["rgb"] = np.array(self.get_geom_rgb(name))
-
+                #print('DEFAULT COLOR', name, self._defaults[name]["rgb"])
+                
         if self.randomize_skybox:
             tex_id = self._name_to_tex_id("skybox")
             self._defaults["skybox"]["texture"] = self._default_texture_bitmaps[tex_id]
@@ -1253,6 +1254,9 @@ class TextureModder(BaseModder):
         if self.sim._render_context_offscreen is None:
             render_context = MjRenderContextOffscreen(self.sim, device_id)
             render_context.upload_texture(texture.id)
+        else:
+            self.sim._render_context_offscreen.upload_texture(texture.id)
+            #print('UPLOAD TEXTTURE, NO NONE OFFSCREEN CONTEXT', self.sim._render_context_offscreen)
 
     def _check_geom_for_texture(self, name):
         """
@@ -1271,6 +1275,9 @@ class TextureModder(BaseModder):
         if mat_id < 0:
             return False
         tex_id = self.model.mat_texid[mat_id]
+        #print('geom_name', name, 'geom_id', geom_id, 'mat_id', mat_id, 'tex_id', tex_id, type(tex_id))
+        if isinstance(tex_id, (list, tuple, np.ndarray)):
+            tex_id = tex_id[0]
         if tex_id < 0:
             return False
         return True
@@ -1303,6 +1310,10 @@ class TextureModder(BaseModder):
         geom_id = self.model.geom_name2id(name)
         mat_id = self.model.geom_matid[geom_id]
         tex_id = self.model.mat_texid[mat_id]
+        
+        if isinstance(tex_id, (list, tuple, np.ndarray)):
+            tex_id = tex_id[0]
+            
         return tex_id
 
     def _name_to_mat_id(self, name):

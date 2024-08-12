@@ -191,7 +191,7 @@ class MjRenderContext:
     def upload_texture(self, tex_id):
         """Uploads given texture to the GPU."""
         self.gl_ctx.make_current()
-        mujoco.mjr_uploadTexture(self.model, self.con, tex_id)
+        mujoco.mjr_uploadTexture(self.model._model, self.con, tex_id)
 
     def __del__(self):
         # free mujoco rendering context and GL rendering context
