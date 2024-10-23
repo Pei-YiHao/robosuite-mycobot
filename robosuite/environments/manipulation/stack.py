@@ -168,7 +168,7 @@ class Stack(SingleArmEnv):
         # settings for table top
         self.table_full_size = table_full_size
         self.table_friction = table_friction
-        self.table_offset = np.array((0, 0, 0.8))
+        self.table_offset = np.array((-0.4, 0, 0.95))
 
         # reward configuration
         self.reward_scale = reward_scale
@@ -277,7 +277,7 @@ class Stack(SingleArmEnv):
         # lifting is successful when the cube is above the table top by a margin
         cubeA_height = cubeA_pos[2]
         table_height = self.table_offset[2]
-        cubeA_lifted = cubeA_height > table_height + 0.04
+        cubeA_lifted = cubeA_height > table_height + 0.012
         r_lift = 1.0 if cubeA_lifted else 0.0
 
         # Aligning is successful when cubeA is right above cubeB

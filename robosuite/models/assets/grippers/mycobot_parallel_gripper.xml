@@ -1,0 +1,56 @@
+<mujoco model="mycobot_paraller_gripper">
+  <asset>
+    <mesh name="gripper_base" file="meshes/mycobot_paraller_gripper/gripper_base.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="gripper_left" file="meshes/mycobot_paraller_gripper/gripper_left.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="gripper_right" file="meshes/mycobot_paraller_gripper/gripper_right.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <tendon>
+    <fixed name="split">
+      <joint joint="gripper_controller" coef="-0.5"/>
+      <joint joint="gripper_base_to_gripper_right" coef="0.5"/>
+    </fixed>
+  </tendon>
+
+  <actuator>
+      <!-- <general name="gripper_actuator" tendon="split" forcerange="-20 20" ctrlrange="-0.04 0.14" gainprm="20 0 0" forcelimited="true" ctrllimited="true"/> -->
+      <!-- <position ctrllimited="true" ctrlrange="-0.007 0" joint="gripper_controller" kp="1000" name="gripper_finger_joint1" forcelimited="true" forcerange="-20 20"/>
+      <position ctrllimited="true" ctrlrange="0 0.007" joint="gripper_base_to_gripper_right" kp="1000" name="gripper_finger_joint2" forcelimited="true" forcerange="-20 20"/> -->
+      <position ctrllimited="true" ctrlrange="-0.004 0.014" tendon="split" kp="100" name="gripper_finger" forcelimited="true" forcerange="-20 20"/>
+  </actuator>
+
+  <worldbody>
+    <body name="mycobot_paraller_gripper" pos="0 0 0.03" quat="0.707105 0 0 -0.707105">
+      <site name="ft_frame" pos="0 0.004 -0.035" size="0.01 0.01 0.01" rgba="1 0 0 1" type="sphere" group="1" />
+      <!-- This site was added for visualization. -->
+      <body name="eef" pos="0 0.004 0.03" >
+          <site name="grip_site" pos="0 0 0" size="0.005 0.005 0.005" rgba="1 0 0 0.5" type="sphere" group="1"/>
+          <site name="ee_x" pos="0.1 0 0" size="0.005 .1"  quat="0.707105  0 0.707108 0 " rgba="1 0 0 0" type="cylinder" group="1"/>
+          <site name="ee_y" pos="0 0.1 0" size="0.005 .1" quat="0.707105 0.707108 0 0" rgba="0 1 0 0" type="cylinder" group="1"/>
+          <site name="ee_z" pos="0 0 0.1" size="0.005 .1" quat="1 0 0 0" rgba="0 0 1 0" type="cylinder" group="1"/>
+          <!-- This site was added for visualization. -->
+          <site name="grip_site_cylinder" pos="0 0 0" size="0.005 10" rgba="0 1 0 0.3" type="cylinder" group="1"/>
+      </body>
+      <geom type="mesh" mesh="gripper_base" contype="0" conaffinity="0" group="1" name="gripper_base_vis" rgba="0.96 0.96 0.96 1"/>
+      <body name="gripper_left" pos="0 0 0">
+        <joint name="gripper_controller" pos="0 0 0" axis="1 0 0" type="slide" range="-0.007 0.002" limited="true" damping="1"/>
+        <geom type="mesh" mesh="gripper_left" contype="0" conaffinity="0" group="1" name="gripper_left_vis" rgba="0.96 0.96 0.96 1"/>
+        <geom type="mesh" group="0" conaffinity="1" contype="0" solref="0.02 1" friction="1 0.005 0.0001" condim="4" mesh="gripper_left" name="gripper_left_collision"/>
+        <geom type="box" pos="0.0075 0.003 0.036" size="0.0001 0.01 0.012" rgba="0 0 0 1" group="0" solref="0.01 0.5" friction = "2 0.05 0.0001" conaffinity="1" contype="1" name="gripper_left_inner_tip_collision"/>
+      </body>
+      <body name="gripper_right" pos="0 0 0">
+        <joint name="gripper_base_to_gripper_right" pos="0 0 0" axis="1 0 0" type="slide" range="-0.002 0.007" limited="true" damping="1"/>
+        <geom type="mesh" mesh="gripper_right" contype="0" conaffinity="0" group="1" name="gripper_right_vis" rgba="0.96 0.96 0.96 1"/>
+        <geom type="mesh" group="0" conaffinity="1" contype="0" solref="0.02 1" friction="1 0.005 0.0001" condim="4" mesh="gripper_right" name="gripper_right_collision"/>
+        <geom type="box" pos="-0.0075 0.003 0.036" size="0.0001 0.01 0.012" rgba="0 0 0 1" group="0" solref="0.01 0.5" friction = "2 0.05 0.0001" conaffinity="1" contype="1" name="gripper_right_inner_tip_collision"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <force name="force_ee" site="ft_frame"/>
+    <torque name="torque_ee" site="ft_frame"/>
+  </sensor>
+
+</mujoco>
+

@@ -24,7 +24,7 @@ class Panda(ManipulatorModel):
 
     @property
     def default_gripper(self):
-        return "PandaGripper"
+        return "Robotiq140Gripper"
 
     @property
     def default_controller_config(self):
